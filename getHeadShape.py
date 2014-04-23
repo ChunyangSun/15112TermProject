@@ -101,7 +101,6 @@ if __name__ == '__main__':
                 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                 flow = cv2.calcOpticalFlowFarneback(prevgray, gray, 0.5, 3, 40, 1, 5, 1.2, 1)
 
-                #prevgray = gray
                 mask = calc_mask(flow)
                 hull = process_mask(mask)
                 M = cv2.moments(hull)
@@ -124,10 +123,7 @@ if __name__ == '__main__':
                     avg_cx = cx
                     avg_cy = cy
                     avg_area = area
-                    #stable_count = 0
-                    #first_time = False
-                    #if not is_stablizing:
-                    #    prev_rect = rect
+
                 else:
                     avg_cx = (avg_cx*(running_time_1-1)+cx)/running_time_1
                     avg_cy = (avg_cy*(running_time_1-1)+cy)/running_time_1
@@ -145,28 +141,6 @@ if __name__ == '__main__':
                     else:
                         rect = prev_rect
                         
-        
-                # if mode_flag == '2': # grabcut mode
-                #     # Use Grabcut to Calculate Segmentation
-                    
-                #     bgdModel = np.zeros((1,65),np.float64)
-                #     fgdModel = np.zeros((1,65),np.float64)
-                #     mask2 = np.zeros(img.shape[:2],np.uint8)    
-                #     cv2.grabCut(img,mask2,rect,bgdModel,fgdModel,10,cv2.GC_INIT_WITH_RECT)
-                #     mask2[ mask == 1 ] = 3
-                #     #mask2[ mask == 0 ] = 2
-                #     cv2.grabCut(img,mask2,rect,bgdModel,fgdModel,10,cv2.GC_INIT_WITH_MASK)
-                #     #cv2.grabCut(img,mask2,rect,bgdModel,fgdModel,1,cv2.GC_INIT_WITH_RECT)
-
-                #     #GC_BGD    = 0,  // background
-                #     #GC_FGD    = 1,  // foreground
-                #     #GC_PR_BGD = 2,  // most probably background
-                #     #GC_PR_FGD = 3   // most probably foreground
-
-                #     mask3 = np.zeros(img.shape[:2],np.uint8)
-                #     mask3[rect[1]:rect[1]+rect[3],rect[0]:rect[0]+rect[2]] = mask2[rect[1]:rect[1]+rect[3],rect[0]:rect[0]+rect[2]]
-                #     mask4 = np.where((mask3==2)|(mask3==0),0,1).astype('uint8')
-                #     img = img*mask4[:,:,np.newaxis]
                 
                 if not has_result:
                     result = np.copy(img)
@@ -180,22 +154,13 @@ if __name__ == '__main__':
                     fgdModel = np.zeros((1,65),np.float64)
                     mask2 = np.zeros(img.shape[:2],np.uint8)    
                     cv2.grabCut(img,mask2,rect,bgdModel,fgdModel,10,cv2.GC_INIT_WITH_RECT)
-                    #mask2[ mask == 1 ] = 3
-                    #mask2[ mask == 0 ] = 2
-                    #cv2.grabCut(img,mask2,rect,bgdModel,fgdModel,5,cv2.GC_INIT_WITH_MASK)
-                    #cv2.grabCut(img,mask2,rect,bgdModel,fgdModel,1,cv2.GC_INIT_WITH_RECT)
-
-                    #GC_BGD    = 0,  // background
-                    #GC_FGD    = 1,  // foreground
-                    #GC_PR_BGD = 2,  // most probably background
-                    #GC_PR_FGD = 3   // most probably foreground
-
+                    
                     mask3 = np.zeros(img.shape[:2],np.uint8)
                     mask3[prev_rect[1]:prev_rect[1]+prev_rect[3],prev_rect[0]:prev_rect[0]+prev_rect[2]] = mask2[prev_rect[1]:prev_rect[1]+prev_rect[3],prev_rect[0]:prev_rect[0]+prev_rect[2]]
                     mask4 = np.where((mask3==2)|(mask3==0),0,1).astype('uint8')
                     result = result*mask4[:,:,np.newaxis]
                     crop_img = result[prev_rect[1]:prev_rect[1]+prev_rect[3],prev_rect[0]:prev_rect[0]+prev_rect[2]]
-                    cv2.imwrite('data/'+fn,crop_img)
+                    
                     is_stablizing = False
                     stable_count = 0
                     color = (0,255,0)
@@ -210,14 +175,10 @@ if __name__ == '__main__':
                     color = (0,255,0)
 
                 print stable_count
-                cv2.rectangle(img,(rect[0],rect[1]),(rect[0]+rect[2],rect[1]+rect[3]),color,2)
-                cv2.rectangle(img,(cx,cy),(cx+5,cy+5),(0,0,255),2)
-                cv2.drawContours(img, hull, -1, (0,0,255), 3)
 
+                cv2.drawContours(img, hull, -1, (0,0,255), 3)
                 
-                cv2.imshow('origin', img)
-                cv2.imshow('result', result)
-                #cv2.imshow('origin', mask*255)
+                cv2.imshow('with contours', img)
                 cv2.waitKey(5)
 
             prevgray = gray

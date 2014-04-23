@@ -1,6 +1,7 @@
 import pyglet
 from pyglet import gl
 import math
+
 from Box2D import (
     b2Vec2, b2PolygonDef, b2World,
     b2BodyDef, b2AABB, b2MouseJointDef,
@@ -8,21 +9,15 @@ from Box2D import (
 )
 
 
-ball_tex = pyglet.image.load('textures/earthball.png').get_mipmapped_texture()
-
 FPS = 60
 TIMESTEP = 1.0/FPS
 W = 100
 H = 72
-
 batch = None
 objects = []
 slowmo = False
-
 SCALE = 0.1    # World units - screen units conversion factor
-
 world = None  # let's keep world as a global for now
-mouse_joint = None
 
 def load_image_centered(filename):
     """Load an image and set its anchor point to the middle."""
@@ -47,8 +42,7 @@ def init_world():
     world_bounds.upperBound = (200, 200)
     world = b2World(
         world_bounds,
-        b2Vec2(0, -30),  # Gravity vector
-        True  # Use "sleep" optimisation
+        b2Vec2(0, -30), True  # Gravity vector
     )
 
     wallsdef = b2BodyDef()
@@ -117,17 +111,18 @@ def mousePressed(x, y, button, modifiers):
 
 count = 0
 def timerFired(dt):
-	global count
-	count += 1
-	world.Step(TIMESTEP * 0.2 if slowmo else TIMESTEP, 20, 16)
-	for b in objects:
-	    b.timerFired(dt)
-	if count % 1000 == 0:
-		v = b2Vec2(math.cos(20), math.sin(20))
-		pos = b2Vec2(0, 2) + v * 3
-		print v 
-		ShootingBall.fire(pos, v*50)
-	redrawALL()
+    global count
+    count += 1
+    world.Step(TIMESTEP * 0.2 if slowmo else TIMESTEP, 20, 16)
+    for b in objects:
+        b.timerFired(dt)
+    print count
+    if count % 100 == 0:
+    	v = b2Vec2(math.cos(20), math.sin(20))
+    	pos = b2Vec2(0, 2) + v * 3
+    	print "v", v 
+    	ShootingBall.fire(pos, v*60)
+    redrawALL()
 
 
 def draw_obj(body, tex):
